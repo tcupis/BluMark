@@ -108,10 +108,13 @@ class App:
             for row in reader:
                 if row.get("node") and row["node"] != platform.node():
                     continue
-                total = 0
-                for key in Benchmark.METRIC_KEYS:
-                    if key in row:
-                        total += float(row[key])
+                try:
+                    total = sum(
+                        float(row[k]) for k in Benchmark.METRIC_KEYS if row.get(k)
+                    )
+                except (TypeError, ValueError):
+                    # Skip malformed rows from older formats
+                    continue
                 ts = row.get("timestamp") or str(len(scores) + 1)
                 scores.append((ts, total / 100000))
         return scores
