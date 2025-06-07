@@ -6,13 +6,7 @@ performance over time.
 
 ## Usage
 
-1. Install dependencies (only `matplotlib` is required for plotting):
-
-```bash
-pip install matplotlib
-```
-
-2. Run the GUI benchmark:
+Run the GUI benchmark:
 
 ```bash
 python main.py
@@ -21,10 +15,5 @@ python main.py
 Press **Run** to execute the benchmark. A score is shown in the window and the
 raw counts are appended to `results.csv`.
 
-3. To visualize how scores change across runs, execute:
-
-```bash
-python plot_results.py
-```
-
-This opens a set of graphs showing each metric for all recorded runs.
+The CSV file can be opened in your spreadsheet or plotting tool of choice to
+track results over time.

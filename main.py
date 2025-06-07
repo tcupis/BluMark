@@ -1,37 +1,60 @@
 import tkinter as tk
 import threading
 from benchmark import Benchmark
-import plot_results
 
 
 class App:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.geometry("240x160")
+        self.root.geometry("400x250")
         self.root.title("BluMark")
+        self.root.configure(bg="#242424")
 
         self.score_label = tk.Label(
-            self.root, text="0", bg="lightblue", font=("Arial", 32, "bold")
+            self.root,
+            text="0.0",
+            bg="#1e90ff",
+            fg="white",
+            font=("Helvetica", 40, "bold"),
         )
-        self.score_label.pack(pady=10, ipadx=30)
+        self.score_label.pack(pady=20, ipadx=40)
 
-        tk.Button(self.root, text="Run", command=self.run).pack(ipady=10, ipadx=70)
-        tk.Button(self.root, text="Show Graphs", command=self.plot).pack(
-            ipady=5, ipadx=60, pady=5
+        self.status_label = tk.Label(
+            self.root, text="Ready", bg="#242424", fg="white", font=("Helvetica", 12)
         )
+        self.status_label.pack(pady=(0, 10))
+
+        self.run_button = tk.Button(
+            self.root,
+            text="Run Benchmark",
+            command=self.run,
+            bg="#4caf50",
+            fg="white",
+            activebackground="#45a049",
+            relief=tk.FLAT,
+            font=("Helvetica", 14, "bold"),
+            width=15,
+        )
+        self.run_button.pack(ipady=8)
 
         self.benchmark = Benchmark()
+        self.running = False
 
     def run(self):
-        threading.Thread(target=self._run_benchmark).start()
+        if self.running:
+            return
+        self.running = True
+        self.run_button.config(state=tk.DISABLED)
+        self.status_label.config(text="Running...")
+        threading.Thread(target=self._run_benchmark, daemon=True).start()
 
     def _run_benchmark(self):
         results = self.benchmark.run()
-        total = sum(results.values()) // 1000
-        self.score_label.config(text=str(total))
-
-    def plot(self):
-        threading.Thread(target=plot_results.plot_results).start()
+        total = sum(results.values()) / 100000
+        self.score_label.config(text=f"{total:.1f}")
+        self.status_label.config(text="Done")
+        self.run_button.config(state=tk.NORMAL)
+        self.running = False
 
 
 if __name__ == "__main__":
