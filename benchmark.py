@@ -1,11 +1,13 @@
 import csv
 import os
+import platform
+from datetime import datetime
 import random
 import time
 
 
 class Benchmark:
-    HEADERS = [
+    METRIC_KEYS = [
         "fpc_score",
         "fpa_score",
         "fpm_score",
@@ -13,12 +15,18 @@ class Benchmark:
         "brs_score",
         "brm_score",
     ]
+    HEADERS = [
+        "timestamp",
+        "node",
+        "system",
+        "machine",
+    ] + METRIC_KEYS
 
     def __init__(self, csv_file="results.csv"):
         self.csv_file = csv_file
 
     def run(self, duration=0.5):
-        results = {key: 0 for key in self.HEADERS}
+        results = {key: 0 for key in self.METRIC_KEYS}
 
         end = time.perf_counter() + duration
         while time.perf_counter() < end:
@@ -70,8 +78,15 @@ class Benchmark:
 
     def _write_results(self, results):
         first = not os.path.exists(self.csv_file)
+        row = {
+            "timestamp": datetime.now().isoformat(sep=" ", timespec="seconds"),
+            "node": platform.node(),
+            "system": platform.system(),
+            "machine": platform.machine(),
+        }
+        row.update(results)
         with open(self.csv_file, "a", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=self.HEADERS)
             if first:
                 writer.writeheader()
-            writer.writerow(results)
+            writer.writerow(row)
