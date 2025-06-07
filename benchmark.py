@@ -1,19 +1,22 @@
+"""CPU benchmarking utilities."""
+
 import csv
 import os
 import platform
 from datetime import datetime
-import random
 import time
 
 
 class Benchmark:
+    """Run a series of CPU bound tests and record the results."""
+
     METRIC_KEYS = [
-        "fpc_score",
-        "fpa_score",
-        "fpm_score",
-        "fpd_score",
-        "brs_score",
-        "brm_score",
+        "fpc_ops",
+        "fpa_ops",
+        "fpm_ops",
+        "fpd_ops",
+        "brs_ops",
+        "brm_ops",
     ]
     HEADERS = [
         "timestamp",
@@ -22,56 +25,75 @@ class Benchmark:
         "machine",
     ] + METRIC_KEYS
 
-    def __init__(self, csv_file="results.csv"):
+    def __init__(self, csv_file: str = "results.csv"):
         self.csv_file = csv_file
 
-    def run(self, duration=0.5):
-        results = {key: 0 for key in self.METRIC_KEYS}
+    def _measure(self, func, iterations: int) -> float:
+        start = time.perf_counter()
+        func(iterations)
+        elapsed = time.perf_counter() - start
+        return iterations / elapsed
 
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            results["fpc_score"] += 1
+    def _run_trials(self, func, iterations: int, trials: int) -> float:
+        total = 0.0
+        for _ in range(trials):
+            total += self._measure(func, iterations)
+        return total / trials
 
-        temp = 0.0
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            temp += random.random()
-            results["fpa_score"] += 1
+    @staticmethod
+    def _loop_add(iterations: int) -> None:
+        x = 0.0
+        for _ in range(iterations):
+            x += 1.0
 
-        temp = 1.0
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            temp *= random.random()
-            results["fpm_score"] += 1
+    @staticmethod
+    def _loop_sub(iterations: int) -> None:
+        x = 0.0
+        for _ in range(iterations):
+            x -= 1.0
 
-        temp = 1.0
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            rnd = random.random() or 1e-9
-            temp /= rnd
-            results["fpd_score"] += 1
+    @staticmethod
+    def _loop_mul(iterations: int) -> None:
+        x = 1.0
+        for _ in range(iterations):
+            x *= 1.000001
 
-        temp = 0.0
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            if random.random() > 0.5:
-                temp += 1
+    @staticmethod
+    def _loop_div(iterations: int) -> None:
+        x = 1.0
+        for _ in range(iterations):
+            x /= 1.000001
+
+    @staticmethod
+    def _branch_simple(iterations: int) -> None:
+        x = 0
+        for i in range(iterations):
+            if i % 2:
+                x += 1
             else:
-                temp -= 1
-            results["brs_score"] += 1
+                x -= 1
 
-        end = time.perf_counter() + duration
-        while time.perf_counter() < end:
-            tmp = random.random()
-            if tmp > 0.75:
-                tmp += 1
-            elif tmp > 0.5:
-                tmp -= 1
-            elif tmp > 0.25:
-                tmp += 1
+    @staticmethod
+    def _branch_mixed(iterations: int) -> None:
+        x = 0
+        for i in range(iterations):
+            if i % 3 == 0:
+                x += 1
+            elif i % 3 == 1:
+                x -= 1
             else:
-                tmp -= 1
-            results["brm_score"] += 1
+                x += 2
+
+    def run(self, iterations: int = 1_000_000, trials: int = 3):
+        """Execute the benchmark and return operations per second for each test."""
+        results = {
+            "fpc_ops": self._run_trials(self._loop_add, iterations, trials),
+            "fpa_ops": self._run_trials(self._loop_sub, iterations, trials),
+            "fpm_ops": self._run_trials(self._loop_mul, iterations, trials),
+            "fpd_ops": self._run_trials(self._loop_div, iterations, trials),
+            "brs_ops": self._run_trials(self._branch_simple, iterations, trials),
+            "brm_ops": self._run_trials(self._branch_mixed, iterations, trials),
+        }
 
         self._write_results(results)
         return results

@@ -53,7 +53,7 @@ class App:
 
     def _run_benchmark(self):
         results = self.benchmark.run()
-        total = sum(results.values()) / 100000
+        total = sum(results.values()) / 1_000_000
         self.score_label.config(text=f"{total:.1f}")
         self.status_label.config(text="Done")
         self.run_button.config(state=tk.NORMAL)
