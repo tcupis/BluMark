@@ -15,8 +15,7 @@ python main.py
 ```
 
 Press **Run** to execute the benchmark. A score is shown in the window and the
-raw counts are appended to `results.csv`. Use the **Show History** button to view
-past scores for the current computer directly within the app.
+raw counts are appended to `results.csv`.
 
-The CSV file can be opened in your spreadsheet or plotting tool of choice to
-track results over time.
+Open `results.csv` in your spreadsheet or plotting tool of choice to track
+results over time.
