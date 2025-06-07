@@ -14,6 +14,13 @@ Press **Run Benchmark** to execute the tests. The window shows the combined scor
 
 Open the CSV file in any spreadsheet or plotting tool to graph your scores over time.
 
+## GUI
+Screenshot of the application GUI after running a test on a AMD Ryzen 7 3700X 8-Core Processor giving it a score of `1.81`.
+
+<img width="301" alt="GUI" src="https://github.com/user-attachments/assets/cd1c7d69-0d94-4a1c-b367-57c7af112b71" />
+
+
+
 ## Programmatic use
 
 You can also invoke the benchmark from your own scripts:
